@@ -52,14 +52,14 @@ func TestingS3Bucket(t *testing.T, terraformOpts *terraform.Options, awsRegion s
 
 func TestingEc2Instance(t *testing.T, terraformOpts *terraform.Options, awsRegion string, NAME_TAG string, OWNER_TAG string) {
 	// Get Terraform output
-	ec2InstanceId := terraform.Output(t, terraformOpts, "ec2_instance_id")
-	fmt.Println("MRG_DEBUG:::TERRATEST_OUTPUT:: Instance ID:", ec2InstanceId)
+	ec2InstanceID := terraform.Output(t, terraformOpts, "ec2_instance_id")
+	fmt.Println("MRG_DEBUG:::TERRATEST_OUTPUT:: Instance ID:", ec2InstanceID)
 
 	// Here I'm just using another approach to test that the actual ec2 instance that was created, has the wanted tags
 	// Note that i could've used "GetEc2InstanceIdsByTag" to do it in the same exact way that we did with asserting S3 Bucket
 	// But just to use various approaches
 	// Also i think this approach is better as then we will be returning an array of tags, and we could just find the needle in a really small haystack
-	ec2Tags := aws.GetTagsForEc2Instance(t, awsRegion, ec2InstanceId)
+	ec2Tags := aws.GetTagsForEc2Instance(t, awsRegion, ec2InstanceID)
 	fmt.Println("MRG_DEBUG:::INSTANCE_TAGS:: Tags:", ec2Tags)
 
 	nameTag := GetTagValue(ec2Tags, "Name")
