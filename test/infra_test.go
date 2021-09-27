@@ -29,8 +29,8 @@ func GetTagValue(tags map[string]string, key string) string {
 
 func TestingS3Bucket(t *testing.T, terraformOpts *terraform.Options, awsRegion string, NAME_TAG string, OWNER_TAG string) {
 	// Get Terraform output "bucket_id"
-	bucketId := terraform.Output(t, terraformOpts, "bucket_id")
-	fmt.Println("MRG_DEBUG:::TERRATEST_OUTPUT:: Bucket ID:", bucketId)
+	bucketID := terraform.Output(t, terraformOpts, "bucket_id")
+	fmt.Println("MRG_DEBUG:::TERRATEST_OUTPUT:: Bucket ID:", bucketID)
 
 	// Get this bucket by "Name" tag
 	bucketNameByNameTag := aws.FindS3BucketWithTag(t, awsRegion, "Name", NAME_TAG)
@@ -41,13 +41,13 @@ func TestingS3Bucket(t *testing.T, terraformOpts *terraform.Options, awsRegion s
 	fmt.Println("MRG_DEBUG:::FIND_S3_BUCKET_BY_TAG::OWNER:: Bucket:", bucketNameByOwnerTag)
 
 	// Check if this bucket actually exists
-	aws.AssertS3BucketExists(t, awsRegion, bucketId)
+	aws.AssertS3BucketExists(t, awsRegion, bucketID)
 
 	// Check that bucket was found by querying it with "Name" tag
-	assert.Equal(t, bucketId, bucketNameByNameTag)
+	assert.Equal(t, bucketID, bucketNameByNameTag)
 
 	// Check that bucket was found by querying it with "Owner" tag
-	assert.Equal(t, bucketId, bucketNameByOwnerTag)
+	assert.Equal(t, bucketID, bucketNameByOwnerTag)
 }
 
 func TestingEc2Instance(t *testing.T, terraformOpts *terraform.Options, awsRegion string, NAME_TAG string, OWNER_TAG string) {
