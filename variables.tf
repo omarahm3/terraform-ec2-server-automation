@@ -1,5 +1,5 @@
 variable "aws" {
-  type    = map
+  type = map(any)
   default = {
     region = "eu-central-1"
   }
@@ -7,25 +7,25 @@ variable "aws" {
 
 variable "name_tag_value" {
   description = "Name tag value"
-  default = "MrGeek"
+  default     = "MrGeek"
 }
 
 variable "s3_bucket_name" {
   description = "S3 Bucket Name"
-  default = "mrg-bucket"
+  default     = "mrg-bucket"
 }
 
 variable "owner_tag_value" {
   description = "Owner tag value"
-  default = "MRG"
+  default     = "MRG"
 }
 
 variable "aws_access_key" {
   description = "AWS access key"
-  default = ""
+  default     = ""
 }
 
 variable "aws_secret_key" {
   description = "AWS secret key"
-  default = ""
+  default     = ""
 }
