@@ -73,37 +73,37 @@ func TestingEc2Instance(t *testing.T, terraformOpts *terraform.Options, awsRegio
 }
 
 func TestingPythonServer(t *testing.T, terraformOpts *terraform.Options, awsRegion string) {
-	DEFAULT_TRIES := 10
-	DEFAULT_TIME_BETWEEN_TRIES := 10 * time.Second
-	NAME_TAG := "Flugel"
-	OWNER_TAG := "InfraTeam"
+	DefaultTries := 10
+	DefaultTimeBetweenTries := 10 * time.Second
+	NameTag := "Flugel"
+	OwnerTag := "InfraTeam"
 
-	ec2InstanceId := terraform.Output(t, terraformOpts, "ec2_instance_id")
-	ec2PublicIp := terraform.Output(t, terraformOpts, "ec2_instance_public_ip")
-	fmt.Println("MRG_DEBUG:::INSTANCE_IP:: Instance IP:", ec2PublicIp)
+	ec2InstanceID := terraform.Output(t, terraformOpts, "ec2_instance_id")
+	ec2PublicIP := terraform.Output(t, terraformOpts, "ec2_instance_public_ip")
+	fmt.Println("MRG_DEBUG:::INSTANCE_IP:: Instance IP:", ec2PublicIP)
 
-	ec2Url := fmt.Sprintf("http://%s", ec2PublicIp)
+	ec2Url := fmt.Sprintf("http://%s", ec2PublicIP)
 	fmt.Println("MRG_DEBUG:::INSTANCE_URL:: Instance URL:", ec2Url)
 
 	// Check the home page of server that is returning a response
-	http_helper.HttpGetWithRetryWithCustomValidation(t, ec2Url, &tls.Config{}, DEFAULT_TRIES, DEFAULT_TIME_BETWEEN_TRIES, func(status int, body string) bool {
+	http_helper.HttpGetWithRetryWithCustomValidation(t, ec2Url, &tls.Config{}, DefaultTries, DefaultTimeBetweenTries, func(status int, body string) bool {
 		assert.Equal(t, 200, status)
 		return strings.Contains(strings.ToLower(body), "up & running")
 	})
 
 	// Check that it is listing the correct tags
-	http_helper.HttpGetWithRetryWithCustomValidation(t, fmt.Sprintf("%s/tags", ec2Url), &tls.Config{}, DEFAULT_TRIES, DEFAULT_TIME_BETWEEN_TRIES, func(status int, body string) bool {
+	http_helper.HttpGetWithRetryWithCustomValidation(t, fmt.Sprintf("%s/tags", ec2Url), &tls.Config{}, DefaultTries, DefaultTimeBetweenTries, func(status int, body string) bool {
 		assert.Equal(t, 200, status)
 		parsedBody := strings.ToLower(body)
-		return strings.Contains(parsedBody, "name") && strings.Contains(parsedBody, strings.ToLower(NAME_TAG)) &&
-			strings.Contains(parsedBody, "owner") && strings.Contains(parsedBody, strings.ToLower(OWNER_TAG))
+		return strings.Contains(parsedBody, "name") && strings.Contains(parsedBody, strings.ToLower(NameTag)) &&
+			strings.Contains(parsedBody, "owner") && strings.Contains(parsedBody, strings.ToLower(OwnerTag))
 	})
 
 	// Check that user can shutdown the instance
-	http_helper.HttpGetWithRetryWithCustomValidation(t, fmt.Sprintf("%s/shutdown", ec2Url), &tls.Config{}, DEFAULT_TRIES, DEFAULT_TIME_BETWEEN_TRIES, func(status int, body string) bool {
+	http_helper.HttpGetWithRetryWithCustomValidation(t, fmt.Sprintf("%s/shutdown", ec2Url), &tls.Config{}, DefaultTries, DefaultTimeBetweenTries, func(status int, body string) bool {
 		assert.Equal(t, 200, status)
 		parsedBody := strings.ToLower(body)
-		return strings.Contains(parsedBody, ec2InstanceId) && strings.Contains(parsedBody, "shutdown")
+		return strings.Contains(parsedBody, ec2InstanceID) && strings.Contains(parsedBody, "shutdown")
 	})
 
 	fmt.Println("MRG_DEBUG:::TESTING_SERVER_AVAILABILITY:: Waiting 30 seconds before testing..")
@@ -112,9 +112,9 @@ func TestingPythonServer(t *testing.T, terraformOpts *terraform.Options, awsRegi
 	time.Sleep(30 * time.Second)
 
 	// Check that server is up and running then
-	escapeServerCacheUrl := fmt.Sprintf("%s/?q=%s", ec2Url, random.UniqueId())
+	escapeServerCacheURL := fmt.Sprintf("%s/?q=%s", ec2Url, random.UniqueId())
 
-	fmt.Println("MRG_DEBUG:::TESTING_SERVER_AVAILABILITY:: Testing server with this URL", escapeServerCacheUrl)
+	fmt.Println("MRG_DEBUG:::TESTING_SERVER_AVAILABILITY:: Testing server with this URL", escapeServerCacheURL)
 
 	// This somehow is failing on Github Workflow with "context deadline exceeded (Client.Timeout exceeded while awaiting headers)" error
 	// It works locally though!
@@ -125,7 +125,7 @@ func TestingPythonServer(t *testing.T, terraformOpts *terraform.Options, awsRegi
 	//})
 
 	// Test the web server using a random query string to escape server side caching
-	_, err := net.DialTimeout("tcp", escapeServerCacheUrl, DEFAULT_TIME_BETWEEN_TRIES)
+	_, err := net.DialTimeout("tcp", escapeServerCacheURL, DefaultTimeBetweenTries)
 
 	assert.NotNil(t, err)
 }
@@ -133,8 +133,8 @@ func TestingPythonServer(t *testing.T, terraformOpts *terraform.Options, awsRegi
 // Wrapper function to prepare the infrastructure, terratest, and terraform variables
 func TestInfrastructure(t *testing.T) {
 	awsRegion := "eu-central-1"
-	NAME_TAG := "Flugel"
-	OWNER_TAG := "InfraTeam"
+	NameTag := "Flugel"
+	OwnerTag := "InfraTeam"
 
 	terraformOpts := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		TerraformDir: "../",
@@ -151,10 +151,10 @@ func TestInfrastructure(t *testing.T) {
 	terraform.InitAndApply(t, terraformOpts)
 
 	// Test EC2 instance
-	TestingEc2Instance(t, terraformOpts, awsRegion, NAME_TAG, OWNER_TAG)
+	TestingEc2Instance(t, terraformOpts, awsRegion, NameTag, OwnerTag)
 
 	// Test S3 bucket
-	TestingS3Bucket(t, terraformOpts, awsRegion, NAME_TAG, OWNER_TAG)
+	TestingS3Bucket(t, terraformOpts, awsRegion, NameTag, OwnerTag)
 
 	fmt.Println("MRG_DEBUG:::TEST_INFRA:: Pause for 1min before testing the web server")
 
