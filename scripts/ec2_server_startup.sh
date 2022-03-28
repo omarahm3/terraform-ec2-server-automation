@@ -25,7 +25,7 @@ for env in $(cat /etc/environment); do export $(echo $env | sed -e 's/"//g'); do
 cd $MAIN_DIR
 
 # Clone the server
-git clone https://github.com/omarking05/simple-python-server.git server >> $LOG_DIR/mrg_git.log
+git clone https://github.com/omarahm3/flask-ec2-web-server.git server >> $LOG_DIR/mrg_git.log
 
 cd server
 
